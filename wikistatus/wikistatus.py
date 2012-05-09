@@ -30,7 +30,7 @@ from nova.openstack.common import cfg
 from nova import utils
 from nova.plugin import plugin
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger('nova.plugin.%s' % __name__)
 
 wiki_opts = [
     cfg.StrOpt('wiki_host',
@@ -125,27 +125,29 @@ class WikiStatus(object):
     def _wiki_login(self):
         if not self._wiki_logged_in:
             if not self.site:
-                self.site = mwclient.Site(self.host, retry_timeout = 5, max_retries = 2)
+                self.site = mwclient.Site(self.host,
+                                          retry_timeout=5,
+                                          max_retries=2)
             if self.site:
                 self.site.login(FLAGS.wiki_login, FLAGS.wiki_password)
                 self._wiki_logged_in = True
             else:
                 LOG.warning("Unable to reach %s.  We'll keep trying, "
                             "but pages will be out of sync in the meantime.")
-                          
 
     def _keystone_login(self, tenant_id):
         if not self.kclient:
             self.kclient = keystoneclient.Client(token='devstack',
-                                                 username=FLAGS.wiki_keystone_login,
-                                                 password=FLAGS.wiki_keystone_password,
-                                                 tenant_id=tenant_id,
-                                                 endpoint=FLAGS.wiki_keystone_auth_url)
+                                       username=FLAGS.wiki_keystone_login,
+                                       password=FLAGS.wiki_keystone_password,
+                                       tenant_id=tenant_id,
+                                       endpoint=FLAGS.wiki_keystone_auth_url)
 
             self.tenant_manager = self.kclient.tenants
             self.user_manager = self.kclient.users
-            self.token = self.kclient.tokens.authenticate(username=FLAGS.wiki_keystone_login,
-                                                      password=FLAGS.wiki_keystone_password).id
+            self.token = self.kclient.tokens.authenticate(
+                       username=FLAGS.wiki_keystone_login,
+                       password=FLAGS.wiki_keystone_password).id
 
         return self.kclient
 
@@ -178,7 +180,8 @@ class WikiStatus(object):
         instance_name = payload['display_name']
 
         pagename = "%s%s" % (FLAGS.wiki_page_prefix, instance_name)
-        LOG.debug("wikistatus:  Writing instance info to page http://%s/wiki/%s" %
+        LOG.debug("wikistatus:  Writing instance info"
+                  " to page http://%s/wiki/%s" %
                   (self.host, pagename))
 
         if event_type == 'compute.instance.delete.end':
@@ -188,7 +191,8 @@ class WikiStatus(object):
             for field in self.RawTemplateFields:
                 template_param_dict[field] = payload[field]
 
-            if FLAGS.wiki_use_keystone and self._keystone_login(payload['tenant_id']):
+            if (FLAGS.wiki_use_keystone and
+                self._keystone_login(payload['tenant_id'])):
                 tenant_obj = self.tenant_manager.get(payload['tenant_id'])
                 user_obj = self.user_manager.get(payload['user_id'])
                 tenant_name = tenant_obj.name
@@ -213,7 +217,7 @@ class WikiStatus(object):
             template_param_dict['availability_zone'] = inst.availability_zone
             template_param_dict['original_host'] = inst.launched_on
             template_param_dict['public_ip'] = inst.access_ip_v4
-            
+
             try:
                 fixed_ips = db.fixed_ip_get_by_instance(ctxt, simple_id)
             except exception.FixedIpNotFoundForInstance:
@@ -240,8 +244,10 @@ class WikiStatus(object):
         try:
             page.edit()
             page.save(page_string, "Auto update of instance info.")
-        except (mwclient.errors.InsufficientPermission, mwclient.errors.LoginError):
-            LOG.debug("Andrew:  Failed to update wiki page... trying to re-login next time.")
+        except (mwclient.errors.InsufficientPermission,
+                mwclient.errors.LoginError):
+            LOG.debug("Andrew:  Failed to update wiki page..."
+                      " trying to re-login next time.")
             self._wiki_logged_in = False
 
 
@@ -254,4 +260,3 @@ class StatusPlugin(plugin.Plugin):
 
     def on_service_load(self, service_class):
         LOG.debug("wikistatus activate load %s" % service_class)
-
