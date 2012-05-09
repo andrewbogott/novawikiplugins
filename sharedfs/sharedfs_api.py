@@ -25,6 +25,7 @@ from nova import flags
 from nova import log as logging
 from nova.openstack.common import cfg
 from nova.openstack.common import importutils
+import sharedfs_db
 
 FLAGS = flags.FLAGS
 
@@ -112,7 +113,7 @@ def _has_db_support():
     # If we're using this extension on a pre-folsom
     # version of Nova then we might not have db support.
     # If that's true we need to disable certain features.
-    return hasattr(db, 'filesystem_list')
+    return hasattr(sharedfs_db, 'filesystem_list')
 
 
 class SharedFSController(object):
@@ -137,13 +138,13 @@ class SharedFSController(object):
         context = req.environ['nova.context']
 
         if self.has_db_support:
-            db_list = db.filesystem_list(context)
+            db_list = sharedfs_db.filesystem_list(context)
 
             fs_list = []
             for fs in filesystems:
                 name = fs.get('name')
                 if name in db_list:
-                    db_entry = db.filesystem_get(context, name)
+                    db_entry = sharedfs_db.filesystem_get(context, name)
                     fs_list.append({'name': fs.get('name'),
                                     'size': fs.get('size'),
                                     'scope': db_entry.get('scope'),
@@ -183,7 +184,7 @@ class SharedFSController(object):
 
         try:
             if self.has_db_support:
-                db.filesystem_add(context, name, scope, project)
+                sharedfs_db.filesystem_add(context, name, scope, project)
 
             self.fs_driver.create_fs(name, project, size)
         except exception.NotAuthorized:
@@ -228,7 +229,7 @@ class SharedFSController(object):
         if self.has_db_support:
             # Unattach global or project-wide shares immediately.
             context = req.environ['nova.context']
-            fs_entry = db.filesystem_get(context, name)
+            fs_entry = sharedfs_db.filesystem_get(context, name)
             if not fs_entry:
                 msg = _("Filesystem %s not found.") % name
                 raise webob.exc.HTTPNotFound(msg)
@@ -259,7 +260,7 @@ class SharedFSController(object):
                     LOG.warning(_("Unable to get IP address for %s.")
                               % instance.id)
 
-            db.filesystem_delete(context, name)
+            sharedfs_db.filesystem_delete(context, name)
 
         try:
             self.fs_driver.delete_fs(name, project)

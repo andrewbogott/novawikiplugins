@@ -26,6 +26,7 @@ from nova import test
 from . import test_sharedfs
 from nova.tests.api.openstack import fakes
 from nova import utils
+from .. import sharedfs_db
 
 FLAGS = flags.FLAGS
 
@@ -71,10 +72,10 @@ class GlusterDriverTest(test.TestCase):
                        '_cleanup_bricks',
                        gl_cleanup_bricks)
 
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_list',
                        test_sharedfs.db_filesystem_list)
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_get',
                        test_sharedfs.db_filesystem_get)
         self.stubs.Set(db,
@@ -86,7 +87,7 @@ class GlusterDriverTest(test.TestCase):
         self.stubs.Set(db,
                        'fixed_ip_get_by_instance',
                        test_sharedfs.db_fixed_ip_get_by_instance)
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_delete',
                        test_sharedfs.db_filesystem_delete)
 
@@ -94,10 +95,10 @@ class GlusterDriverTest(test.TestCase):
         self.old_FLAGS_gluster_bricks = FLAGS.gluster_bricks
 
         FLAGS.sharedfs_driver = (
-            "nova.sharedfs.sharedfs_gluster_driver.GlusterDriver")
+            "sharedfs.drivers.sharedfs_gluster_driver.GlusterDriver")
         FLAGS.gluster_bricks = ['fake:fake', 'example:example']
-        self.fs_controller = shared_fs.SharedFSController()
-        self.attachment_controller = shared_fs.SharedFSAttachmentController()
+        self.fs_controller = sharedfs_api.SharedFSController()
+        self.attachment_controller = sharedfs_api.SharedFSAttachmentController()
 
     def tearDown(self):
         FLAGS.sharedfs_driver = self.old_FLAGS_sharedfs_driver

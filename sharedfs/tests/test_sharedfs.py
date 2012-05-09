@@ -24,6 +24,7 @@ from nova import test
 from .. import sharedfs_api
 from .. import sharedfs_notifier
 from nova.tests.api.openstack import fakes
+from .. import sharedfs_db
 
 instance_fs_name = "instancefs"
 project_fs_name = "projectfs"
@@ -151,7 +152,7 @@ class SharedFSTest(test.TestCase):
         def db_filesystem_add(context, name, scope, project):
             pass
 
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_add',
                        db_filesystem_add)
 
@@ -162,7 +163,7 @@ class SharedFSTest(test.TestCase):
                        'create_fs',
                        driver_fs_create)
 
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_delete',
                        db_filesystem_delete)
 
@@ -177,10 +178,10 @@ class SharedFSTest(test.TestCase):
         self.stubs.Set(sharedfs_driver.SharedFSDriver,
                        'list_fs',
                        driver_list_fs)
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_list',
                        db_filesystem_list)
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_get',
                        db_filesystem_get)
 
@@ -268,7 +269,7 @@ class SharedFSTest(test.TestCase):
                        'fixed_ip_get_by_instance',
                        db_fixed_ip_get_by_instance)
 
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_get',
                        db_filesystem_get)
 
@@ -306,7 +307,7 @@ class SharedFSTest(test.TestCase):
                        'fixed_ip_get_by_instance',
                        db_fixed_ip_get_by_instance)
 
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_get',
                        db_filesystem_get)
 
@@ -440,10 +441,10 @@ class TestNotificationResponse(test.TestCase):
         self.notifier = sharedfs_notifier.SharedFSNotifier()
 
     def testInstanceCreationNotice(self):
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_list',
                        db_filesystem_list)
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_get',
                        db_filesystem_get)
         self.stubs.Set(db,
@@ -488,10 +489,10 @@ class TestNotificationResponse(test.TestCase):
         self.assertEqual(attachments[0].get('ip'), instance2_ip)
 
     def testInstanceDeletionNotice(self):
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_list',
                        db_filesystem_list)
-        self.stubs.Set(db,
+        self.stubs.Set(sharedfs_db,
                        'filesystem_get',
                        db_filesystem_get)
         self.stubs.Set(db,
