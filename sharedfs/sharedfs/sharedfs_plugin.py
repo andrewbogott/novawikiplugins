@@ -25,6 +25,5 @@ class SharedFSPlugin(plugin.Plugin):
 
     def __init__(self):
         LOG.debug("Sharedfs activate init!")
-        statusNotifier = WikiStatus()
-        super(StatusPlugin, self).__init__([sharedfs_api.Shared_fs],
-                                          [sharedfs_notifier.SharedFSNotifier])
+        super(SharedFSPlugin, self).__init__([sharedfs_api.Shared_fs],
+                                        [sharedfs_notifier.SharedFSNotifier])
