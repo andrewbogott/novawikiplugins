@@ -21,7 +21,7 @@ from nova.openstack.common import cfg
 from nova import utils
 
 FLAGS = flags.FLAGS
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("nova.plugin.%s" % __name__)
 
 
 class SharedFSDriver(object):

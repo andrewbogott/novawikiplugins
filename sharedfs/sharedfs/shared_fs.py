@@ -27,7 +27,7 @@ from nova import utils
 
 FLAGS = flags.FLAGS
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("nova.plugin.%s" % __name__)
 authorize = extensions.extension_authorizer('volume', 'shared_fs')
 
 

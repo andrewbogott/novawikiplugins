@@ -29,7 +29,7 @@ from nova.volume import volume_types
 
 
 FLAGS = flags.FLAGS
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("nova.plugin.%s" % __name__)
 
 gluster_opts = [
     cfg.StrOpt('gluster_mode',

@@ -120,6 +120,7 @@ class SharedFSController(object):
     """Shared FileSystem controller for OpenStack API."""
 
     def __init__(self):
+        LOG.debug("SharedFSController init.")
         self.fs_driver = importutils.import_object(FLAGS.sharedfs_driver)
         self.fs_driver.do_setup()
         self.fs_driver.check_for_setup_error()

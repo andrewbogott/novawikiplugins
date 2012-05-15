@@ -21,7 +21,7 @@ from nova.openstack.common import cfg
 from nova.openstack.common import importutils
 import sharedfs_db
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("nova.plugin.%s" % __name__)
 
 FLAGS = flags.FLAGS
 
