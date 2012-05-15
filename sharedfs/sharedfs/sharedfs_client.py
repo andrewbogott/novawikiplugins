@@ -21,6 +21,7 @@ import urllib
 
 from novaclient import base
 from openstackclient.common import command
+from openstackclient.common import utils
 
 
 class SharedFilesystem(base.Resource):
