@@ -19,7 +19,7 @@ from nova import flags
 from nova import log as logging
 from nova.openstack.common import cfg
 from nova.openstack.common import importutils
-from sharedfs import db
+from sharedfs import db as sharedfs_db
 
 LOG = logging.getLogger("nova.plugin.%s" % __name__)
 
@@ -63,9 +63,9 @@ class SharedFSNotifier(object):
         #  and all project-scope systems that are
         #  associated with this project.
         fs_list = []
-        db_fs_list = db.filesystem_list(ctxt)
+        db_fs_list = sharedfs_db.filesystem_list(ctxt)
         for fs_name in db_fs_list:
-            fs = db.filesystem_get(ctxt, fs_name)
+            fs = sharedfs_db.filesystem_get(ctxt, fs_name)
             if not fs:
                 LOG.debug(_("Database inconsistency:  no record for FS %s") %
                           fs_name)

@@ -17,14 +17,14 @@ import UserDict
 
 import webob
 
-from ..drivers import sharedfs_driver
 from nova import context
 from nova import db
 from nova import test
-from .. import sharedfs_api
-from .. import sharedfs_notifier
 from nova.tests.api.openstack import fakes
-from .. import sharedfs_db
+from sharedfs import api
+from sharedfs import notifier
+from sharedfs import db as sharedfs_db
+from sharedfs.driver import sharedfs_driver
 
 instance_fs_name = "instancefs"
 project_fs_name = "projectfs"
@@ -147,7 +147,7 @@ def db_fixed_ip_get_by_address(context, ip):
 class SharedFSTest(test.TestCase):
     def setUp(self):
         super(SharedFSTest, self).setUp()
-        self.fs_controller = sharedfs_api.SharedFSController()
+        self.fs_controller = api.SharedFSController()
 
         def db_filesystem_add(context, name, scope, project):
             pass
@@ -338,7 +338,7 @@ def driver_list_attachments(self, fs_name):
 class SharedAttachTest(test.TestCase):
     def setUp(self):
         super(SharedAttachTest, self).setUp()
-        self.attachment_controller = sharedfs_api.SharedFSAttachmentController()
+        self.attachment_controller = api.SharedFSAttachmentController()
 
     def test_list_attachments(self):
         self.stubs.Set(sharedfs_driver.SharedFSDriver,
@@ -438,7 +438,7 @@ class SharedAttachTest(test.TestCase):
 class TestNotificationResponse(test.TestCase):
     def setUp(self):
         super(TestNotificationResponse, self).setUp()
-        self.notifier = sharedfs_notifier.SharedFSNotifier()
+        self.notifier = notifier.SharedFSNotifier()
 
     def testInstanceCreationNotice(self):
         self.stubs.Set(sharedfs_db,

@@ -17,16 +17,16 @@ import UserDict
 
 import webob
 
-from .. import sharedfs_api
 from nova import context
 from nova import db
 from nova import flags
-from ..drivers import sharedfs_gluster_driver
 from nova import test
 from . import test_sharedfs
 from nova.tests.api.openstack import fakes
 from nova import utils
-from .. import sharedfs_db
+from sharedfs import api
+from sharedfs import db as sharedfs_db
+from sharedfs.driver import sharedfs_gluster_driver
 
 FLAGS = flags.FLAGS
 
@@ -95,10 +95,10 @@ class GlusterDriverTest(test.TestCase):
         self.old_FLAGS_gluster_bricks = FLAGS.gluster_bricks
 
         FLAGS.sharedfs_driver = (
-            "sharedfs.drivers.sharedfs_gluster_driver.GlusterDriver")
+            "sharedfs.driver.sharedfs_gluster_driver.GlusterDriver")
         FLAGS.gluster_bricks = ['fake:fake', 'example:example']
-        self.fs_controller = sharedfs_api.SharedFSController()
-        self.attachment_controller = sharedfs_api.SharedFSAttachmentController()
+        self.fs_controller = api.SharedFSController()
+        self.attachment_controller = api.SharedFSAttachmentController()
 
     def tearDown(self):
         FLAGS.sharedfs_driver = self.old_FLAGS_sharedfs_driver
@@ -117,6 +117,13 @@ class GlusterDriverTest(test.TestCase):
         self.assertEqual(fs_entries[1].get('scope'), 'instance')
 
     def test_gluster_create(self):
+        def db_filesystem_add(context, name, scope, project):
+            pass
+
+        self.stubs.Set(sharedfs_db,
+                       'filesystem_add',
+                       db_filesystem_add)
+
         body = {'fs_entry': {'size': 11, 'scope': 'project'}}
         req = fakes.HTTPRequest.blank('/vw/123/os-filesystem/%s'
                                         % test_sharedfs.project_fs_name,
