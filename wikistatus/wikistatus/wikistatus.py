@@ -174,7 +174,6 @@ class WikiStatus(object):
             LOG.debug("Ignoring message type %s" % event_type)
             return
 
-        LOG.debug("Andrew, message is %s" % message)
         payload = message['payload']
         instance = payload['instance_id']
         instance_name = payload['display_name']
@@ -246,7 +245,7 @@ class WikiStatus(object):
             page.save(page_string, "Auto update of instance info.")
         except (mwclient.errors.InsufficientPermission,
                 mwclient.errors.LoginError):
-            LOG.debug("Andrew:  Failed to update wiki page..."
+            LOG.debug("Failed to update wiki page..."
                       " trying to re-login next time.")
             self._wiki_logged_in = False
 
@@ -254,9 +253,8 @@ class WikiStatus(object):
 class StatusPlugin(plugin.Plugin):
 
     def __init__(self):
-        LOG.debug("wikistatus activate init!")
         statusNotifier = WikiStatus()
         super(StatusPlugin, self).__init__([], [statusNotifier])
 
     def on_service_load(self, service_class):
-        LOG.debug("wikistatus activate load %s" % service_class)
+        pass
