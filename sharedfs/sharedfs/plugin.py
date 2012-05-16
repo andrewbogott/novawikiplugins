@@ -24,6 +24,5 @@ LOG = logging.getLogger('nova.plugin.%s' % __name__)
 class SharedFSPlugin(plugin.Plugin):
 
     def __init__(self):
-        LOG.debug("Sharedfs activate init!")
         super(SharedFSPlugin, self).__init__([api.Shared_fs],
                                         [notifier.SharedFSNotifier])
