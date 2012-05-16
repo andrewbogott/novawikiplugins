@@ -16,8 +16,8 @@ import sys
 
 from nova import logging
 from nova.plugin import plugin
-import sharedfs_notifier
-import sharedfs_api
+from sharedfs import notifier
+from sharedfs import api
 
 LOG = logging.getLogger('nova.plugin.%s' % __name__)
 
@@ -25,5 +25,5 @@ class SharedFSPlugin(plugin.Plugin):
 
     def __init__(self):
         LOG.debug("Sharedfs activate init!")
-        super(SharedFSPlugin, self).__init__([sharedfs_api.Shared_fs],
-                                        [sharedfs_notifier.SharedFSNotifier])
+        super(SharedFSPlugin, self).__init__([api.Shared_fs],
+                                        [notifier.SharedFSNotifier])

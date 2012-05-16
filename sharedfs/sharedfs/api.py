@@ -23,12 +23,20 @@ from nova import db
 from nova import exception
 from nova import flags
 from nova import log as logging
-from nova import utils
+from nova.openstack.common import cfg
+from nova.openstack.common import importutils
+from sharedfs import db
 
 FLAGS = flags.FLAGS
 
 LOG = logging.getLogger("nova.plugin.%s" % __name__)
 authorize = extensions.extension_authorizer('volume', 'shared_fs')
+
+opts = cfg.StrOpt('sharedfs_driver',
+                  default="sharedfs.drivers.sharedfs_driver.SharedFSDriver",
+                  help='Driver to manage shared filesystems. '
+                       'Default is an empty do-nothing driver.'),
+FLAGS.register_opts(opts)
 
 
 def make_client_entry(elem):
@@ -112,7 +120,8 @@ class SharedFSController(object):
     """Shared FileSystem controller for OpenStack API."""
 
     def __init__(self):
-        self.fs_driver = utils.import_object(FLAGS.sharedfs_driver)
+        LOG.debug("SharedFSController init.")
+        self.fs_driver = importutils.import_object(FLAGS.sharedfs_driver)
         self.fs_driver.do_setup()
         self.fs_driver.check_for_setup_error()
         self.has_db_support = _has_db_support()
@@ -269,7 +278,7 @@ class SharedFSController(object):
 class SharedFSAttachmentController(object):
     """Shared FileSystem instance attachment controller for OpenStack API."""
     def __init__(self):
-        self.fs_driver = utils.import_object(FLAGS.sharedfs_driver)
+        self.fs_driver = importutils.import_object(FLAGS.sharedfs_driver)
         self.has_db_support = _has_db_support()
         if not self.has_db_support:
             LOG.warn(_("The Shared Filesystem database extensions are not "
