@@ -42,7 +42,10 @@ setuptools.setup(
         'openstack.cli': [
             'create_filesystem=sharedfs.shell:Create_Filesystem',
             'delete_filesystem=sharedfs.shell:Delete_Filesystem',
-            'list_filesystem=sharedfs.shell:List_Filesystems',
+            'list_filesystem=sharedfs.shell:List_Filesystem',
+            'attachments_filesystem=sharedfs.shell:Attachments_Filesystem',
+            'attach_filesystem=sharedfs.shell:Attach_Filesystem',
+            'detach_filesystem=sharedfs.shell:Detach_Filesystem'
         ]
     },
     py_modules=[]

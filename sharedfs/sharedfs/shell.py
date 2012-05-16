@@ -24,14 +24,15 @@ from openstackclient.common import utils
 
 from sharedfs import client
 
-class List_Filesystems(command.OpenStackCommand, lister.Lister):
+
+class List_Filesystem(command.OpenStackCommand, lister.Lister):
     "Show filesystem command."
 
     api = 'compute'
     log = logging.getLogger("nova.plugin.%s" % __name__)
 
     def get_parser(self, prog_name):
-        parser = super(List_Filesystems, self).get_parser(prog_name)
+        parser = super(List_Filesystem, self).get_parser(prog_name)
         parser.add_argument(
            '--long',
             action='store_true',
@@ -40,7 +41,7 @@ class List_Filesystems(command.OpenStackCommand, lister.Lister):
         return parser
 
     def get_data(self, parsed_args):
-        self.log.debug('v2.Show_Filesystem.run(%s)' % parsed_args)
+        self.log.debug('v2.List_Filesystem.run(%s)' % parsed_args)
         if parsed_args.long:
             columns = ('Name', 'Size', 'Scope', 'Project')
         else:
@@ -80,7 +81,6 @@ class Create_Filesystem(command.OpenStackCommand, show.ShowOne):
             help='New filesystem scope (project, global, or instance)')
         return parser
 
-
     def get_data(self, parsed_args):
         self.log.debug('v2.Create_Filesystem.get_data(%s)' % parsed_args)
         nova_client = self.app.client_manager.compute
@@ -97,23 +97,92 @@ class Create_Filesystem(command.OpenStackCommand, show.ShowOne):
                 )
 
 
-class Delete_Filesystem(command.OpenStackCommand, command.Command):
-    """Create filesystem command"""
+class Attachments_Filesystem(command.OpenStackCommand, lister.Lister):
+    "Command to list attachments to a given FS"
 
     api = 'compute'
     log = logging.getLogger("nova.plugin.%s" % __name__)
 
     def get_parser(self, prog_name):
-        parser = super(Delete_Filesystem, self).get_parser(prog_name)
+        parser = super(Attachments_Filesystem, self).get_parser(prog_name)
         parser.add_argument(
             'filesystem_name',
             metavar='<filesystem-name>',
-            help='Filesystem to delete')
+            help='Filesystem name')
         return parser
 
+    def get_data(self, parsed_args):
+        self.log.debug('v2.List_Attachment.run(%s)' % parsed_args)
+        columns = (['id'])
+
+        nova_client = self.app.client_manager.compute
+        fsmanager = client.SharedFSAttachmentManager(nova_client)
+        data = fsmanager.attachments(parsed_args.filesystem_name)
+
+        return (columns,
+                (utils.get_item_properties(
+                    s, columns,
+                    formatters={},
+                    ) for s in data),
+                )
+
+
+class Attach_Filesystem(command.OpenStackCommand, show.ShowOne):
+    "Command to list attachments to a given FS"
+
+    api = 'compute'
+    log = logging.getLogger("nova.plugin.%s" % __name__)
+
+    def get_parser(self, prog_name):
+        parser = super(Attach_Filesystem, self).get_parser(prog_name)
+        parser.add_argument(
+            'filesystem_name',
+            metavar='<filesystem-name>',
+            help='Filesystem name')
+        parser.add_argument(
+            'instance_id',
+            metavar='<instance-id>',
+            help='Instance ID')
+        return parser
+
+    def get_data(self, parsed_args):
+        self.log.debug('v2.Attach_Filesystem.run(%s)' % parsed_args)
+
+        nova_client = self.app.client_manager.compute
+        fsmanager = client.SharedFSAttachmentManager(nova_client)
+        data = fsmanager.attach(parsed_args.filesystem_name,
+                                parsed_args.instance_id)
+
+        columns = (['id'])
+        return (columns,
+                utils.get_item_properties(
+                    data, columns,
+                    formatters={})
+                )
+
+
+class Detach_Filesystem(command.OpenStackCommand, command.Command):
+    "Command to list attachments to a given FS"
+
+    api = 'compute'
+    log = logging.getLogger("nova.plugin.%s" % __name__)
+
+    def get_parser(self, prog_name):
+        parser = super(Detach_Filesystem, self).get_parser(prog_name)
+        parser.add_argument(
+            'filesystem_name',
+            metavar='<filesystem-name>',
+            help='Filesystem name')
+        parser.add_argument(
+            'instance_id',
+            metavar='<instance-id>',
+            help='Instance ID')
+        return parser
 
     def run(self, parsed_args):
-        self.log.debug('v2.Delete_Filesystem.get_data(%s)' % parsed_args)
+        self.log.debug('v2.Detach_Filesystem.run(%s)' % parsed_args)
+
         nova_client = self.app.client_manager.compute
-        fsmanager = client.SharedFileSystemManager(nova_client)
-        fs = fsmanager.delete(parsed_args.filesystem_name)
+        fsmanager = client.SharedFSAttachmentManager(nova_client)
+        fsmanager.unattach(parsed_args.filesystem_name,
+                           parsed_args.instance_id)
