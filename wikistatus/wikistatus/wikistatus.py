@@ -253,8 +253,9 @@ class WikiStatus(object):
 class StatusPlugin(plugin.Plugin):
 
     def __init__(self):
+        super(StatusPlugin, self).__init__()
         statusNotifier = WikiStatus()
-        super(StatusPlugin, self).__init__([], [statusNotifier])
+        self.add_notifier(statusNotifier)
 
     def on_service_load(self, service_class):
         pass

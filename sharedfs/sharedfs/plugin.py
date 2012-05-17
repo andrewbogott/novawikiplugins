@@ -24,5 +24,6 @@ LOG = logging.getLogger('nova.plugin.%s' % __name__)
 class SharedFSPlugin(plugin.Plugin):
 
     def __init__(self):
-        super(SharedFSPlugin, self).__init__([api.Shared_fs],
-                                        [notifier.SharedFSNotifier])
+        super(SharedFSPlugin, self).__init__()
+        self.add_notifier(notifier.SharedFSNotifier)
+        self.add_api_extension_descriptor(api.Shared_fs)

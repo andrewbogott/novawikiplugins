@@ -38,7 +38,7 @@ setuptools.setup(
         "Programming Language :: Python"
     ],
     entry_points={
-        "nova.plugin": ["plugin=sharedfs.sharedfs_plugin:SharedFSPlugin"],
+        "nova.plugin": ["plugin=sharedfs.plugin:SharedFSPlugin"],
         'openstack.cli': [
             'create_filesystem=sharedfs.shell:Create_Filesystem',
             'delete_filesystem=sharedfs.shell:Delete_Filesystem',
