@@ -97,6 +97,28 @@ class Create_Filesystem(command.OpenStackCommand, show.ShowOne):
                 )
 
 
+class Delete_Filesystem(command.OpenStackCommand, command.Command):
+    "Command to delete a shared FileSystem"
+
+    api = 'compute'
+    log = logging.getLogger("nova.plugin.%s" % __name__)
+
+    def get_parser(self, prog_name):
+        parser = super(Delete_Filesystem, self).get_parser(prog_name)
+        parser.add_argument(
+            'filesystem_name',
+            metavar='<filesystem-name>',
+            help='Filesystem name')
+        return parser
+
+    def run(self, parsed_args):
+        self.log.debug('v2.Delete_Filesystem.run(%s)' % parsed_args)
+
+        nova_client = self.app.client_manager.compute
+        fsmanager = client.SharedFileSystemManager(nova_client)
+        fs = fsmanager.delete(parsed_args.filesystem_name)
+
+
 class Attachments_Filesystem(command.OpenStackCommand, lister.Lister):
     "Command to list attachments to a given FS"
 
