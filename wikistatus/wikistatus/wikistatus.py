@@ -228,9 +228,9 @@ class WikiStatus(object):
             grps = [grp.name for grp in sec_groups]
             template_param_dict['security_group'] = ','.join(grps)
 
-            #image = self._image_service.show(ctxt, inst.image_ref)
-            #template_param_dict['image_name'] = image.name
-            template_param_dict['image_name'] = inst.image_ref
+            image = self._image_service.show(ctxt, inst.image_ref)
+            image_name = image.get('name', inst.image_ref)
+            template_param_dict['image_name'] = image_name
 
             fields_string = ""
             for key in template_param_dict:
