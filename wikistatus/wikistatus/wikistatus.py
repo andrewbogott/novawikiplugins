@@ -106,8 +106,9 @@ class WikiStatus(object):
     def __init__(self):
         self.host = FLAGS.wiki_host
         self.site = None
-        self.kclient = None
-        self.nclient = None
+        self.kclient = {}
+        self.tenant_manager = {}
+        self.user_manager = {}
         self._wiki_logged_in = False
         self._image_service = image.get_default_image_service()
 
@@ -124,21 +125,18 @@ class WikiStatus(object):
                 LOG.warning("Unable to reach %s.  We'll keep trying, "
                             "but pages will be out of sync in the meantime.")
 
-    def _keystone_login(self, tenant_id):
-        if not self.kclient:
-            self.kclient = keystoneclient.Client(token='devstack',
+    def _keystone_login(self, tenant_id, ctxt):
+        if tenant_id not in self.kclient:
+            self.kclient[tenant_id] = keystoneclient.Client(token='devstack',
                                        username=FLAGS.wiki_keystone_login,
                                        password=FLAGS.wiki_keystone_password,
                                        tenant_id=tenant_id,
                                        endpoint=FLAGS.wiki_keystone_auth_url)
 
-            self.tenant_manager = self.kclient.tenants
-            self.user_manager = self.kclient.users
-            self.token = self.kclient.tokens.authenticate(
-                       username=FLAGS.wiki_keystone_login,
-                       password=FLAGS.wiki_keystone_password).id
+            self.tenant_manager[tenant_id] = self.kclient[tenant_id].tenants
+            self.user_manager[tenant_id] = self.kclient[tenant_id].users
 
-        return self.kclient
+        return self.kclient[tenant_id]
 
     def notify(self, ctxt, message):
         event_type = message.get('event_type')
@@ -164,10 +162,11 @@ class WikiStatus(object):
             for field in self.RawTemplateFields:
                 template_param_dict[field] = payload[field]
 
+            tenant_id = payload['tenant_id']
             if (FLAGS.wiki_use_keystone and
-                self._keystone_login(payload['tenant_id'])):
-                tenant_obj = self.tenant_manager.get(payload['tenant_id'])
-                user_obj = self.user_manager.get(payload['user_id'])
+                self._keystone_login(tenant_id, ctxt)):
+                tenant_obj = self.tenant_manager[tenant_id].get(tenant_id)
+                user_obj = self.user_manager[tenant_id].get(payload['user_id'])
                 tenant_name = tenant_obj.name
                 user_name = user_obj.name
             else:
