@@ -18,8 +18,6 @@ sys.path.append("/home/andrew/mwclient/")
 import mwclient
 
 from keystoneclient.v2_0 import client as keystoneclient
-from novaclient import client as novaclient
-from novaclient import utils as novaclientutils
 
 from nova import db
 from nova import exception
@@ -57,15 +55,6 @@ wiki_opts = [
     cfg.StrOpt('wiki_keystone_password',
                default='devstack',
                help='keystone admin password'),
-    cfg.StrOpt('wiki_nova_login',
-                default='demo',
-                help='nova login'),
-    cfg.StrOpt('wiki_nova_password',
-               default='devstack',
-               help='nova password'),
-    cfg.StrOpt('wiki_nova_auth_url',
-                default='http://127.0.0.1:5000/v2.0',
-                help='nova auth url'),
     cfg.MultiStrOpt('wiki_eventtype_whitelist',
                default=['compute.instance.delete.start',
                         'compute.instance.delete.end',
@@ -150,21 +139,6 @@ class WikiStatus(object):
                        password=FLAGS.wiki_keystone_password).id
 
         return self.kclient
-
-    def _nova_login(self, tenant_name):
-        if not self.nclient:
-            self.nclient = novaclient.Client('1.1',
-                                             FLAGS.wiki_nova_login,
-                                             FLAGS.wiki_nova_password,
-                                             tenant_name,
-                                             FLAGS.wiki_nova_auth_url,
-                                             False,
-                                             region_name='',
-                                             endpoint_type='publicURL',
-                                             extensions=[],
-                                             service_type='compute',
-                                             service_name='')
-        return self.nclient
 
     def notify(self, ctxt, message):
         event_type = message.get('event_type')
