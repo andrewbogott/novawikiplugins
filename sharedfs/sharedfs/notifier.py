@@ -15,7 +15,6 @@
 
 from nova import context
 from nova import db
-from nova import flags
 from nova import log as logging
 from nova.openstack.common import cfg
 from nova.openstack.common import importutils
@@ -23,7 +22,7 @@ from sharedfs import db as sharedfs_db
 
 LOG = logging.getLogger("nova.plugin.%s" % __name__)
 
-FLAGS = flags.FLAGS
+CONF = cfg.CONF
 
 NOTIFICATIONS = []
 
@@ -44,7 +43,7 @@ class SharedFSNotifier(object):
     """
 
     def __init__(self):
-        self.fs_driver = importutils.import_object(FLAGS.sharedfs_driver)
+        self.fs_driver = importutils.import_object(CONF.sharedfs_driver)
 
     def notify(self, message):
         event_type = message.get('event_type')

@@ -18,13 +18,12 @@ from sqlalchemy import Column, String, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 import nova
-from nova import flags
 from nova import log as logging
 from nova.openstack.common import cfg
 from nova.db.sqlalchemy import models
 
 
-FLAGS = flags.FLAGS
+CONF = cfg.CONF
 LOG = logging.getLogger("nova.plugin.%s" % __name__)
 
 opts = [
@@ -36,7 +35,7 @@ opts = [
                help='connection string for sharedfs sql database'),
 ]
 
-FLAGS.register_opts(opts)
+CONF.register_opts(opts)
 
 _ENGINE = None
 _MAKER = None
@@ -107,7 +106,7 @@ def get_engine():
     if _ENGINE:
         return _ENGINE
     models = [FileSystem]
-    engine = sqlalchemy.create_engine(FLAGS.sharedfs_sql_connection,
+    engine = sqlalchemy.create_engine(CONF.sharedfs_sql_connection,
                                       echo=False)
     for model in models:
         model.metadata.create_all(engine)
