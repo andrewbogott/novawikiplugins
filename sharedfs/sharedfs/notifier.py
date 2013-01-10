@@ -15,9 +15,9 @@
 
 from nova import context
 from nova import db
-from nova import log as logging
 from nova.openstack.common import cfg
 from nova.openstack.common import importutils
+from nova.openstack.common import log as logging
 from sharedfs import db as sharedfs_db
 
 LOG = logging.getLogger("nova.plugin.%s" % __name__)

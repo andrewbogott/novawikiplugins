@@ -14,8 +14,8 @@
 #    under the License.
 import sys
 
-from nova import logging
-from nova.plugin import plugin
+from nova.openstack.common import log as logging
+from nova.openstack.common.plugin import plugin
 from sharedfs import notifier
 from sharedfs import api
 
@@ -23,7 +23,7 @@ LOG = logging.getLogger('nova.plugin.%s' % __name__)
 
 class SharedFSPlugin(plugin.Plugin):
 
-    def __init__(self):
-        super(SharedFSPlugin, self).__init__()
-        self.add_notifier(notifier.SharedFSNotifier)
-        self.add_api_extension_descriptor(api.Shared_fs)
+    def __init__(self, service_name):
+        super(SharedFSPlugin, self).__init__(service_name)
+        self._add_notifier(notifier.SharedFSNotifier)
+        self._add_api_extension_descriptor(api.Shared_fs)

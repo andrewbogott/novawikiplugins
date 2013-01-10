@@ -18,8 +18,8 @@ from sqlalchemy import Column, String, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 import nova
-from nova import log as logging
 from nova.openstack.common import cfg
+from nova.openstack.common import log as logging
 from nova.db.sqlalchemy import models
 
 

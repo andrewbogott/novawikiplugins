@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
-
 from cliff import command
 from cliff import lister
 from cliff import show
+
+from nova.openstack.common import log as logging
 
 from openstackclient.common import command
 from openstackclient.common import utils

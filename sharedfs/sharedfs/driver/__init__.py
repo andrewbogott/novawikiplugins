@@ -18,5 +18,3 @@
 
 # Importing full names to not pollute the namespace and cause possible
 # collisions with use of 'from nova.network import <foo>' elsewhere.
-import nova.flags
-import nova.utils
