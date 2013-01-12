@@ -40,7 +40,7 @@ class List_Filesystem(command.OpenStackCommand, lister.Lister):
             help='Additional fields are listed in output')
         return parser
 
-    def get_data(self, parsed_args):
+    def take_action(self, parsed_args):
         self.log.debug('v2.List_Filesystem.run(%s)' % parsed_args)
         if parsed_args.long:
             columns = ('Name', 'Size', 'Scope', 'Project')
@@ -81,7 +81,7 @@ class Create_Filesystem(command.OpenStackCommand, show.ShowOne):
             help='New filesystem scope (project, global, or instance)')
         return parser
 
-    def get_data(self, parsed_args):
+    def take_action(self, parsed_args):
         self.log.debug('v2.Create_Filesystem.get_data(%s)' % parsed_args)
         nova_client = self.app.client_manager.compute
         fsmanager = client.SharedFileSystemManager(nova_client)
@@ -111,7 +111,7 @@ class Delete_Filesystem(command.OpenStackCommand, command.Command):
             help='Filesystem name')
         return parser
 
-    def run(self, parsed_args):
+    def take_action(self, parsed_args):
         self.log.debug('v2.Delete_Filesystem.run(%s)' % parsed_args)
 
         nova_client = self.app.client_manager.compute
@@ -133,7 +133,7 @@ class Attachments_Filesystem(command.OpenStackCommand, lister.Lister):
             help='Filesystem name')
         return parser
 
-    def get_data(self, parsed_args):
+    def take_action(self, parsed_args):
         self.log.debug('v2.List_Attachment.run(%s)' % parsed_args)
         columns = (['id'])
 
@@ -167,7 +167,7 @@ class Attach_Filesystem(command.OpenStackCommand, show.ShowOne):
             help='Instance ID')
         return parser
 
-    def get_data(self, parsed_args):
+    def take_action(self, parsed_args):
         self.log.debug('v2.Attach_Filesystem.run(%s)' % parsed_args)
 
         nova_client = self.app.client_manager.compute
@@ -201,7 +201,7 @@ class Detach_Filesystem(command.OpenStackCommand, command.Command):
             help='Instance ID')
         return parser
 
-    def run(self, parsed_args):
+    def take_action(self, parsed_args):
         self.log.debug('v2.Detach_Filesystem.run(%s)' % parsed_args)
 
         nova_client = self.app.client_manager.compute
