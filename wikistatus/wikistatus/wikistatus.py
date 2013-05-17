@@ -23,10 +23,10 @@ from nova import db
 from nova import exception
 from nova import flags
 from nova import image
-from nova import log as logging
+from nova.openstack.common import log as logging
 from nova.openstack.common import cfg
+from nova.openstack.common.plugin import plugin
 from nova import utils
-from nova.plugin import plugin
 
 LOG = logging.getLogger('nova.plugin.%s' % __name__)
 
@@ -34,6 +34,9 @@ wiki_opts = [
     cfg.StrOpt('wiki_host',
                default='deployment.wikimedia.beta.wmflabs.org',
                help='Mediawiki host to receive updates.'),
+    cfg.StrOpt('wiki_domain',
+               default='labs',
+               help='wiki domain to receive updates.'),
     cfg.StrOpt('wiki_page_prefix',
                default='InstanceStatus_',
                help='Created pages will have form <prefix>_<instancename>.'),
@@ -110,7 +113,7 @@ class WikiStatus(object):
         self.tenant_manager = {}
         self.user_manager = {}
         self._wiki_logged_in = False
-        self._image_service = image.get_default_image_service()
+        self._image_service = image.glance.get_default_image_service()
 
     def _wiki_login(self):
         if not self._wiki_logged_in:
@@ -119,7 +122,7 @@ class WikiStatus(object):
                                           retry_timeout=5,
                                           max_retries=2)
             if self.site:
-                self.site.login(FLAGS.wiki_login, FLAGS.wiki_password)
+                self.site.login(FLAGS.wiki_login, FLAGS.wiki_password, domain=FLAGS.wiki_domain)
                 self._wiki_logged_in = True
             else:
                 LOG.warning("Unable to reach %s.  We'll keep trying, "
@@ -169,15 +172,8 @@ class WikiStatus(object):
                 user_obj = self.user_manager[tenant_id].get(payload['user_id'])
                 tenant_name = tenant_obj.name
                 user_name = user_obj.name
-            else:
-                project = db.project_get(None, payload['tenant_id'])
-                tenant_name = project.name
-
-                user = db.user_get(None, payload['user_id'])
-                user_name = user.name
-
-            template_param_dict['tenant'] = tenant_name
-            template_param_dict['username'] = user_name
+                template_param_dict['tenant'] = tenant_name
+                template_param_dict['username'] = user_name
 
             inst = db.instance_get_by_uuid(ctxt, payload['instance_id'])
 
@@ -191,7 +187,7 @@ class WikiStatus(object):
             template_param_dict['public_ip'] = inst.access_ip_v4
 
             try:
-                fixed_ips = db.fixed_ip_get_by_instance(ctxt, simple_id)
+                fixed_ips = db.fixed_ip_get_by_instance(ctxt, payload['instance_id'])
             except exception.FixedIpNotFoundForInstance:
                 fixed_ips = []
             ips = [ip.address for ip in fixed_ips]
@@ -225,10 +221,8 @@ class WikiStatus(object):
 
 class StatusPlugin(plugin.Plugin):
 
-    def __init__(self):
-        super(StatusPlugin, self).__init__()
+    def __init__(self, service_name):
+        super(StatusPlugin, self).__init__(service_name)
         statusNotifier = WikiStatus()
-        self.add_notifier(statusNotifier)
-
-    def on_service_load(self, service_class):
-        pass
+        self.service_name = service_name
+        self._add_notifier(statusNotifier)
